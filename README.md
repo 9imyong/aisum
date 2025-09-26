@@ -1,7 +1,6 @@
-회사 지원 포트폴리오 작성용
+## 디렉터리 구조
 
-디렉터리 구조
-
+```
 aisum/
 ├── docker-compose.yml
 ├── .env
@@ -27,3 +26,4 @@ aisum/
 │           ├── tasks.py
 │           ├── db.py
 │           └── models.py
+```
