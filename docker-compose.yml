@@ -1,0 +1,82 @@
+version: "3.8"
+
+services:
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: kafka
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      # 편의상 토픽 자동생성 (학습용)
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      # 로그/데이터 디렉터리
+      - KAFKA_CFG_LOG_DIRS=/bitnami/kafka/data
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/bitnami/kafka
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DB}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  api:
+    build: ./services/api
+    depends_on:
+      - kafka
+      - mysql
+    env_file: .env
+    ports:
+      - "8000:8000"
+
+  consumer:
+    build: ./services/consumer
+    depends_on:
+      - kafka
+      - redis
+    env_file: .env
+
+  worker:
+    build: ./services/worker
+    depends_on:
+      - redis
+      - mysql
+    env_file: .env
+
+  beat:
+    build: ./services/worker
+    command: ["celery", "-A", "worker_app.celery_app", "beat", "-l", "info"]
+    depends_on:
+      - worker
+      - redis
+    env_file: .env
+
+volumes:
+  mysql_data:
+  kafka_data:
