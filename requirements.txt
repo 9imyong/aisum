@@ -6,11 +6,6 @@ fastapi-csrf-protect
 pydantic<2.0.0
 passlib[bcrypt]
 pillow
-ultralytics
-pytesseract
 httpx
-onnxruntime
-torchserve
 numpy==1.23.4
-opencv-python
 pydantic[dotenv]
