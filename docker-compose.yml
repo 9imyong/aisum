@@ -11,16 +11,26 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      # 편의상 토픽 자동생성 (학습용)
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
-      # 로그/데이터 디렉터리
       - KAFKA_CFG_LOG_DIRS=/bitnami/kafka/data
+      - ALLOW_PLAINTEXT_LISTENER=yes
     ports:
       - "9092:9092"
     volumes:
       - kafka_data:/bitnami/kafka
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+
 
   mysql:
     image: mysql:8.0
@@ -33,6 +43,13 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
 
   adminer:
     image: adminer
@@ -47,20 +64,31 @@ services:
       - "6379:6379"
 
   api:
-    build: ./services/api
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
     depends_on:
-      - kafka
-      - mysql
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     env_file: .env
     ports:
       - "8000:8000"
 
+
   consumer:
-    build: ./services/consumer
+    build:
+      context: ./services/consumer
+      dockerfile: Dockerfile
     depends_on:
-      - kafka
-      - redis
+      kafka:
+        condition: service_healthy      # ✅ Kafka healthy 후 시작
+      redis:
+        condition: service_started
     env_file: .env
+    restart: unless-stopped             # ✅ 실패해도 자동 재시작
+
 
   worker:
     build: ./services/worker

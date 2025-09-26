@@ -22,3 +22,8 @@ celery_app.conf.beat_schedule = {
         "schedule": 60.0,
     }
 }
+
+# ... 기존 celery_app 정의 및 beat_schedule 아래에 추가
+from . import tasks  # <- tasks 모듈 명시적으로 import하여 태스크 등록
+# 또는 아래 방식도 가능:
+# celery_app.autodiscover_tasks(['worker_app'])
