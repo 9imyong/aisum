@@ -43,6 +43,7 @@ redis: Celery 브로커(큐)
 
 빠른시작
 ------------------------------------------------------------------------------------------
+```
 # 실행
 docker compose up -d --build
 
@@ -55,6 +56,7 @@ curl -X POST http://localhost:8000/submit \
 # 결과 조회 (위 응답의 id 사용)
 curl http://localhost:8000/results/1
 # => {"id":1,"status":"DONE","note":"Fetched ... bytes","input_text":"hello world"}
+```
 
 트러블슈팅(요약)
 ------------------------------------------------------------------------------------------
