@@ -1,5 +1,5 @@
 이벤트/비동기 미니 마이크로서비스
-
+------------------------------------------------------------------------------------------
 스택: FastAPI + Kafka(KRaft) + aiokafka Consumer + Celery(브로커: Redis) + MySQL + Adminer
 한 줄 설명: “요청은 빨리 받고, 무거운 일은 뒤로 넘기는” 이벤트/비동기 중심 서비스 예제
 
@@ -22,7 +22,7 @@ FastAPI (api)
 조회: GET /results/{id} → MySQL에서 현재 상태/노트 조회
 
 서비스 구성
-
+------------------------------------------------------------------------------------------
 api (FastAPI): 요청 수신, DB 기록, Kafka 발행 (:8000)
 
 kafka (KRaft 모드): 이벤트 스트림 브로커 (kafka:9092) — Zookeeper 불필요
@@ -40,6 +40,8 @@ adminer: DB 웹 콘솔 (:8080)
 redis: Celery 브로커(큐)
 
 트러블슈팅(요약)
+------------------------------------------------------------------------------------------
+```
 **API가 DB 연결 실패
 - MySQL 시작 대기(healthcheck) + init_db()에 재시도(backoff) 권장
 .env의 SQLALCHEMY_DB_URI 확인
@@ -52,9 +54,10 @@ services/worker/worker_app/__init__.py 파일 추가
 celery_app.py 하단에 from . import tasks 추가
 - PyMySQL 인증 에러 (caching_sha2_password)
 cryptography 패키지 설치(권장) 또는 MySQL 유저를 mysql_native_password로 변경**
+```
 
 ## 디렉터리 구조
-
+------------------------------------------------------------------------------------------
 ```
 quikqueue/
 ├── docker-compose.yml
