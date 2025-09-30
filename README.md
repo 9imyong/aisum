@@ -41,6 +41,21 @@ adminer: DB 웹 콘솔 (:8080)
 
 redis: Celery 브로커(큐)
 
+빠른시작
+------------------------------------------------------------------------------------------
+# 실행
+docker compose up -d --build
+
+# 작업 생성
+curl -X POST http://localhost:8000/submit \
+  -H "Content-Type: application/json" \
+  -d '{"text":"hello world"}'
+# => {"id":1,"status":"QUEUED"}
+
+# 결과 조회 (위 응답의 id 사용)
+curl http://localhost:8000/results/1
+# => {"id":1,"status":"DONE","note":"Fetched ... bytes","input_text":"hello world"}
+
 트러블슈팅(요약)
 ------------------------------------------------------------------------------------------
 ```
