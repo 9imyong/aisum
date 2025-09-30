@@ -40,35 +40,23 @@ adminer: DB 웹 콘솔 (:8080)
 redis: Celery 브로커(큐)
 
 트러블슈팅(요약)
-
-API가 DB 연결 실패
-
-MySQL 시작 대기(healthcheck) + init_db()에 재시도(backoff) 권장
-
+**API가 DB 연결 실패
+- MySQL 시작 대기(healthcheck) + init_db()에 재시도(backoff) 권장
 .env의 SQLALCHEMY_DB_URI 확인
-
-consumer가 Kafka에 못 붙음
-
+- consumer가 Kafka에 못 붙음
 ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 확인
-
-Kafka healthcheck + consumer.depends_on + restart 설정
-
+- Kafka healthcheck + consumer.depends_on + restart 설정
 run_consumer.py에 부트스트랩 재시도 코드 추가
-
-Celery 태스크 “unregistered”
-
+- Celery 태스크 “unregistered”
 services/worker/worker_app/__init__.py 파일 추가
-
 celery_app.py 하단에 from . import tasks 추가
-
-PyMySQL 인증 에러 (caching_sha2_password)
-
-cryptography 패키지 설치(권장) 또는 MySQL 유저를 mysql_native_password로 변경
+- PyMySQL 인증 에러 (caching_sha2_password)
+cryptography 패키지 설치(권장) 또는 MySQL 유저를 mysql_native_password로 변경**
 
 ## 디렉터리 구조
 
 ```
-aisum/
+quikqueue/
 ├── docker-compose.yml
 ├── .env
 ├── README.md
